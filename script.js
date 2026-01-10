@@ -316,4 +316,4 @@ function updateThemeButton(theme) {
 document.addEventListener('DOMContentLoaded', function() {
     initTheme();
     // ... остальной код инициализации
-});
+}); 
