@@ -1,4 +1,4 @@
-// ===== КОНФИГ FIREBASE =====
+ // ===== КОНФИГ FIREBASE =====
 const firebaseConfig = {
     apiKey: "AIzaSyBGfP59ZHQgMT8yTXfuGDcYqZADGl1haqg",
     authDomain: "chat-online-12.firebaseapp.com", // УБЕДИСЬ ЧТО ЭТО ПРАВИЛЬНО!
@@ -184,4 +184,4 @@ try {
 } catch (error) {
     console.error("💥 Критическая ошибка:", error);
     alert("Ошибка загрузки чата. Проверь конфиг Firebase.");
-} 
+                    }
