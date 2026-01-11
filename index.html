@@ -28,19 +28,23 @@
             color: white;
             padding: 20px;
             text-align: center;
+            position: relative;
         }
         header h1 {
             font-size: 24px;
+            cursor: pointer;
         }
+        
+        /* СТИЛИ ДЛЯ ВХОДА */
         .auth-panel {
             padding: 30px;
-            text-align: center;
         }
         .auth-panel h2 {
             margin-bottom: 20px;
             color: #333;
+            text-align: center;
         }
-        #username {
+        .auth-panel input {
             width: 100%;
             padding: 15px;
             border: 2px solid #ddd;
@@ -48,10 +52,12 @@
             font-size: 16px;
             margin-bottom: 15px;
         }
-        #username:focus {
+        .auth-panel input:focus {
             outline: none;
             border-color: #4776E6;
         }
+        
+        /* КНОПКИ */
         .btn {
             width: 100%;
             padding: 15px;
@@ -61,19 +67,95 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
+            margin-bottom: 10px;
         }
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        .btn-guest {
+        .btn-primary {
+            background: linear-gradient(to right, #4776E6, #8E54E9);
+            color: white;
+        }
+        .btn-secondary {
             background: linear-gradient(to right, #00b09b, #96c93d);
             color: white;
         }
+        .btn-guest {
+            background: linear-gradient(to right, #f97316, #f59e0b);
+            color: white;
+        }
+        .btn-link {
+            background: transparent;
+            color: #666;
+            text-decoration: underline;
+        }
+        
+        /* ОПЦИИ ВХОДА */
+        .auth-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: #666;
+        }
+        .checkbox-label input {
+            width: auto;
+            margin-right: 8px;
+            margin-bottom: 0;
+        }
+        .auth-link {
+            color: #4776E6;
+            text-decoration: none;
+        }
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* РАЗДЕЛИТЕЛЬ */
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            color: #999;
+            position: relative;
+        }
+        .divider::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: #ddd;
+        }
+        .divider::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: #ddd;
+        }
+        
+        /* ГОСТЬ */
+        .guest-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
         .chat-section {
+        /* ЧАТ (изначально скрыт) */
             display: none;
             flex-direction: column;
-            height: 400px;
+            height: 500px;
         }
         .messages {
             flex: 1;
@@ -105,6 +187,8 @@
             margin-right: auto;
             border-bottom-left-radius: 5px;
         }
+        
+        /* ВВОД СООБЩЕНИЯ */
         .input-area {
             display: flex;
             padding: 15px;
@@ -133,6 +217,8 @@
             font-size: 20px;
             cursor: pointer;
         }
+        
+        /* СТАТУС */
         .status {
             text-align: center;
             padding: 10px;
@@ -146,18 +232,45 @@
 <body>
     <div class="container">
         <header>
-            <h1>мессенджер xxx!</h1>
+            <h1>🔥 Мой Чат</h1>
         </header>
         
+        <!-- ПАНЕЛЬ ВХОДА -->
         <div class="auth-panel" id="authPanel">
             <h2>Вход в чат</h2>
-            <input type="text" id="username" placeholder="Твой ник (от 3 символов)" maxlength="20">
-            <button id="guestLogin" class="btn btn-guest">🎮 Войти как Гость</button>
-            <p style="margin-top: 15px; color: #666; font-size: 14px;">
-                Просто введи ник и нажми кнопку!
-            </p>
+            
+            <!-- ФОРМА ВХОДА -->
+            <div id="loginForm">
+                <input type="text" id="username" placeholder="Имя пользователя">
+                <input type="password" id="password" placeholder="Пароль">
+                <div class="auth-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe">
+                        <span>Запомнить меня</span>
+                    </label>
+                    <a href="#" id="showRegister" class="auth-link">Регистрация</a>
+                </div>
+                <button id="loginBtn" class="btn btn-primary">🔐 Войти</button>
+            </div>
+            
+            <!-- ФОРМА РЕГИСТРАЦИИ (скрыта) -->
+            <div id="registerForm" style="display: none;">
+                <input type="text" id="regUsername" placeholder="Придумайте имя">
+                <input type="password" id="regPassword" placeholder="Придумайте пароль">
+                <input type="password" id="regPasswordConfirm" placeholder="Повторите пароль">
+                <button id="registerBtn" class="btn btn-secondary">📝 Зарегистрироваться</button>
+                <button id="showLogin" class="btn btn-link">← Назад ко входу</button>
+            </div>
+            
+            <!-- ГОСТЬ -->
+            <div class="guest-section">
+                <div class="divider">или</div>
+                <input type="text" id="guestName" placeholder="Быстрое имя для гостя">
+                <button id="guestLogin" class="btn btn-guest">🎮 Войти как Гость</button>
+            </div>
         </div>
         
+        <!-- СЕКЦИЯ ЧАТА (скрыта до входа) -->
         <div class="chat-section" id="chatSection">
             <div class="messages" id="messages"></div>
             <div class="input-area">
@@ -175,6 +288,289 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
-    <script src="script.js"></script>
+    <script>
+// ===== КОНФИГ FIREBASE =====
+const firebaseConfig = {
+    apiKey: "AIzaSyBGfP59ZHQgMT8yTXfuGDcYqZADGl1haqg",
+    authDomain: "chat-online-12.firebaseapp.com",
+    projectId: "chat-online-12",
+    storageBucket: "chat-online-12.firebasestorage.app",
+    messagingSenderId: "503074236144",
+    appId: "1:503074236144:web:01694517bc7210f5708435"
+};
+
+// ===== ОСНОВНОЙ КОД =====
+try {
+    const app = firebase.initializeApp(firebaseConfig);
+    console.log("✅ Firebase подключен");
+    
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    // Переменные
+    let currentUser = null;
+    let username = "";
+    
+    // Элементы
+    const authPanel = document.getElementById('authPanel');
+    const chatSection = document.getElementById('chatSection');
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const onlineCount = document.getElementById('onlineCount');
+    
+    // ===== ПРОСТАЯ СИСТЕМА РЕГИСТРАЦИИ =====
+    function simpleHash(password) {
+        let hash = 0;
+        for (let i = 0; i < password.length; i++) {
+            hash = ((hash << 5) - hash) + password.charCodeAt(i);
+            hash = hash & hash;
+        }
+        return Math.abs(hash).toString(16);
+    }
+    
+    // Переключение форм
+    document.getElementById('showRegister').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'block';
+    });
+    
+    document.getElementById('showLogin').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+    });
+    
+    // Регистрация
+    document.getElementById('registerBtn').addEventListener('click', function() {
+        const regUsername = document.getElementById('regUsername').value.trim();
+        const regPassword = document.getElementById('regPassword').value;
+        const regPasswordConfirm = document.getElementById('regPasswordConfirm').value;
+        
+        // Проверки
+        if (!regUsername || regUsername.length < 3) {
+            alert('Имя должно быть от 3 символов');
+            return;
+        }
+        
+        if (!regPassword || regPassword.length < 4) {
+            alert('Пароль должен быть от 4 символов');
+            return;
+        }
+        
+        if (regPassword !== regPasswordConfirm) {
+            alert('Пароли не совпадают');
+            return;
+        }
+        
+        // Сохраняем в localStorage
+        const users = JSON.parse(localStorage.getItem('chat_users') || '{}');
+        
+        if (users[regUsername]) {
+            alert('Это имя уже занято!');
+            return;
+        }
+        
+        users[regUsername] = {
+            password: simpleHash(regPassword),
+            created: new Date().toISOString()
+        };
+        
+        localStorage.setItem('chat_users', JSON.stringify(users));
+        
+        alert('✅ Регистрация успешна! Теперь войдите');
+        
+        // Переключаем на вход
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+        
+        // Заполняем поля
+        document.getElementById('username').value = regUsername;
+        document.getElementById('password').value = regPassword;
+    });
+    
+    // Вход по паролю
+    document.getElementById('loginBtn').addEventListener('click', async function() {
+        const name = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const rememberMe = document.getElementById('rememberMe').checked;
+        
+        if (!name || !password) {
+            alert('Введите имя и пароль');
+            return;
+        }
+        
+        // Проверяем пользователя
+        const users = JSON.parse(localStorage.getItem('chat_users') || '{}');
+        const user = users[name];
+        
+        if (!user) {
+            alert('Пользователь не найден');
+            return;
+        }
+        
+        if (user.password !== simpleHash(password)) {
+            alert('Неверный пароль');
+            return;
+        }
+        
+        // Сохраняем если нужно
+        if (rememberMe) {
+            localStorage.setItem('chat_saved_name', name);
+        }
+        
+        // Входим в чат
+        username = name;
+        await enterChat();
+    });
+    
+    // Гостевой вход
+    document.getElementById('guestLogin').addEventListener('click', async function() {
+        const guestName = document.getElementById('guestName').value.trim() || "Гость";
+        const name = guestName.length > 20 ? guestName.substring(0, 20) : guestName;
+        
+        if (name.length < 3) {
+            alert('Имя должно быть от 3 символов');
+            return;
+        }
+        
+        username = name + " (Гость)";
+        await enterChat();
+    });
+    
+    // ===== ВХОД В ЧАТ =====
+    async function enterChat() {
+        console.log("Вхожу как:", username);
+        
+        try {
+            // Входим в Firebase анонимно
+            const userCredential = await auth.signInAnonymously();
+            currentUser = userCredential.user;
+            
+            console.log("✅ Вход успешен!");
+            
+            // Переключаем на чат
+            authPanel.style.display = 'none';
+            chatSection.style.display = 'flex';
+            
+            // Активируем поле ввода
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+            messageInput.focus();
+            
+            // Загружаем сообщения
+            loadMessages();
+            
+            // Отслеживаем онлайн
+            trackOnlineUsers();
+            
+        } catch (error) {
+            console.error("Ошибка входа:", error);
+            alert("Ошибка подключения к чату");
+        }
+    }
+    
+    // ===== ЗАГРУЗКА СООБЩЕНИЙ =====
+    function loadMessages() {
+        console.log("Загружаю сообщения...");
+        
+        db.collection('messages')
+            .orderBy('timestamp', 'asc')
+            .limit(50)
+            .onSnapshot(snapshot => {
+                messagesDiv.innerHTML = '';
+                
+                snapshot.forEach(doc => {
+                    const msg = doc.data();
+                    addMessage(msg.username, msg.text, msg.userId === currentUser?.uid);
+                });
+                
+                // Прокрутка вниз
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            });
+    }
+    
+    // ===== ОТПРАВКА СООБЩЕНИЯ =====
+    async function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text || !currentUser) return;
+        
+        try {
+            await db.collection('messages').add({
+                text: text,
+                username: username,
+                userId: currentUser.uid,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            messageInput.value = '';
+            messageInput.focus();
+            
+        } catch (error) {
+            console.error("Ошибка отправки:", error);
+            alert("Не удалось отправить сообщение");
+        }
+    }
+    
+    // ===== ДОБАВЛЕНИЕ СООБЩЕНИЯ НА ЭКРАН =====
+    function addMessage(sender, text, isOwn) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isOwn ? 'sent' : 'received'}`;
+        messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
+        messagesDiv.appendChild(messageDiv);
+        
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+    
+    // ===== ОНЛАЙН ПОЛЬЗОВАТЕЛИ =====
+    function trackOnlineUsers() {
+        if (!currentUser) return;
+        
+        const userRef = db.collection('onlineUsers').doc(currentUser.uid);
+        
+        // Отмечаем себя онлайн
+        userRef.set({
+            username: username,
+            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        // Удаляем при выходе
+        window.addEventListener('beforeunload', () => {
+            userRef.delete();
+        });
+        
+        // Слушаем других
+        db.collection('onlineUsers').onSnapshot(snapshot => {
+            onlineCount.textContent = snapshot.size;
+        });
+    }
+    
+    // ===== СОБЫТИЯ =====
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    sendBtn.addEventListener('click', sendMessage);
+    
+    // ===== АВТО-ВХОД ПРИ СОХРАНЁННОМ ИМЕНИ =====
+    window.addEventListener('load', function() {
+        const savedName = localStorage.getItem('chat_saved_name');
+        if (savedName) {
+            document.getElementById('username').value = savedName;
+            document.getElementById('rememberMe').checked = true;
+            document.getElementById('password').focus();
+        }
+    });
+    
+    console.log("✨ Чат готов к работе!");
+    
+} catch (error) {
+    console.error("💥 Ошибка:", error);
+    alert("Ошибка загрузки чата");
+}
+    </script>
 </body>
-</html> 
+    </html> 
