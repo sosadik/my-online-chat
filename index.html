@@ -81,10 +81,6 @@
             background: linear-gradient(to right, #00b09b, #96c93d);
             color: white;
         }
-        .btn-guest {
-            background: linear-gradient(to right, #f97316, #f59e0b);
-            color: white;
-        }
         .btn-link {
             background: transparent;
             color: #666;
@@ -142,13 +138,6 @@
             width: 45%;
             height: 1px;
             background: #ddd;
-        }
-        
-        /* ГОСТЬ */
-        .guest-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
         }
         
         .chat-section {
@@ -261,13 +250,6 @@
                 <button id="registerBtn" class="btn btn-secondary">📝 Зарегистрироваться</button>
                 <button id="showLogin" class="btn btn-link">← Назад ко входу</button>
             </div>
-            
-            <!-- ГОСТЬ -->
-            <div class="guest-section">
-                <div class="divider">или</div>
-                <input type="text" id="guestName" placeholder="Быстрое имя для гостя">
-                <button id="guestLogin" class="btn btn-guest">🎮 Войти как Гость</button>
-            </div>
         </div>
         
         <!-- СЕКЦИЯ ЧАТА (скрыта до входа) -->
@@ -329,7 +311,7 @@ try {
         return Math.abs(hash).toString(16);
     }
     
-    // Переключение форм
+    // ===== ПЕРЕКЛЮЧЕНИЕ ФОРМ =====
     document.getElementById('showRegister').addEventListener('click', function(e) {
         e.preventDefault();
         document.getElementById('loginForm').style.display = 'none';
@@ -342,7 +324,7 @@ try {
         document.getElementById('loginForm').style.display = 'block';
     });
     
-    // Регистрация
+    // ===== РЕГИСТРАЦИЯ =====
     document.getElementById('registerBtn').addEventListener('click', function() {
         const regUsername = document.getElementById('regUsername').value.trim();
         const regPassword = document.getElementById('regPassword').value;
@@ -390,7 +372,7 @@ try {
         document.getElementById('password').value = regPassword;
     });
     
-    // Вход по паролю
+    // ===== ВХОД ПО ПАРОЛЮ =====
     document.getElementById('loginBtn').addEventListener('click', async function() {
         const name = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
@@ -415,6 +397,21 @@ try {
             return;
         }
         
+        // Проверяем, не в чате ли уже пользователь с таким именем
+        try {
+            const snapshot = await db.collection('onlineUsers')
+                .where('username', '==', name)
+                .limit(1)
+                .get();
+            
+            if (!snapshot.empty) {
+                alert('Это имя уже используется в чате');
+                return;
+            }
+        } catch (error) {
+            console.error("Ошибка проверки:", error);
+        }
+        
         // Сохраняем если нужно
         if (rememberMe) {
             localStorage.setItem('chat_saved_name', name);
@@ -422,20 +419,6 @@ try {
         
         // Входим в чат
         username = name;
-        await enterChat();
-    });
-    
-    // Гостевой вход
-    document.getElementById('guestLogin').addEventListener('click', async function() {
-        const guestName = document.getElementById('guestName').value.trim() || "Гость";
-        const name = guestName.length > 20 ? guestName.substring(0, 20) : guestName;
-        
-        if (name.length < 3) {
-            alert('Имя должно быть от 3 символов');
-            return;
-        }
-        
-        username = name + " (Гость)";
         await enterChat();
     });
     
