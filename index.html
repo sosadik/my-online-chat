@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 Мой Чат</title>
+    <title>Мессенджер</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -216,13 +216,57 @@
             font-size: 14px;
             border-top: 1px solid #eee;
         }
+        /* АЛЬТЕРНАТИВА - если используете класс .dark */
+body.dark {
+    background: #0f172a !important;
+}
+
+body.dark .container {
+    background: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+body.dark header {
+    background: linear-gradient(to right, #3730a3, #7c3aed) !important;
+}
+
+body.dark .auth-panel input {
+    background: #334155 !important;
+    border-color: #475569 !important;
+    color: #e2e8f0 !important;
+}
+
+body.dark .messages {
+    background: #0f172a !important;
+}
+
+body.dark .message.received {
+    background: #334155 !important;
+    border-color: #475569 !important;
+    color: #e2e8f0 !important;
+}
+
+body.dark .input-area {
+    background: #1e293b !important;
+}
+
+body.dark #messageInput {
+    background: #334155 !important;
+    border-color: #475569 !important;
+    color: #e2e8f0 !important;
+}
+
+body.dark .status {
+    background: #1e293b !important;
+    color: #94a3b8 !important;
+}
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🔥 Мой Чат</h1>
-        </header>
+<header>
+    <h1>Мессенджер</h1>
+</header>
         
         <!-- ПАНЕЛЬ ВХОДА -->
         <div class="auth-panel" id="authPanel">
@@ -301,65 +345,73 @@ try {
     const sendBtn = document.getElementById('sendBtn');
     const onlineCount = document.getElementById('onlineCount');
     
-    // ===== ПРОСТАЯ СИСТЕМА РЕГИСТРАЦИИ =====
-    function simpleHash(password) {
-        let hash = 0;
-        for (let i = 0; i < password.length; i++) {
-            hash = ((hash << 5) - hash) + password.charCodeAt(i);
-            hash = hash & hash;
-        }
-        return Math.abs(hash).toString(16);
+// ===== ПРОСТАЯ СИСТЕМА РЕГИСТРАЦИИ В FIRESTORE =====
+function simpleHash(password) {
+    let hash = 0;
+    for (let i = 0; i < password.length; i++) {
+        hash = ((hash << 5) - hash) + password.charCodeAt(i);
+        hash = hash & hash;
+    }
+    return Math.abs(hash).toString(16);
+}
+
+// ===== ПЕРЕКЛЮЧЕНИЕ ФОРМ =====
+document.getElementById('showRegister').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+});
+
+document.getElementById('showLogin').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+});
+
+// ===== РЕГИСТРАЦИЯ В FIRESTORE =====
+document.getElementById('registerBtn').addEventListener('click', async function() {
+    const regUsername = document.getElementById('regUsername').value.trim();
+    const regPassword = document.getElementById('regPassword').value;
+    const regPasswordConfirm = document.getElementById('regPasswordConfirm').value;
+    
+    // Проверки
+    if (!regUsername || regUsername.length < 3) {
+        alert('Имя должно быть от 3 символов');
+        return;
     }
     
-    // ===== ПЕРЕКЛЮЧЕНИЕ ФОРМ =====
-    document.getElementById('showRegister').addEventListener('click', function(e) {
-        e.preventDefault();
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('registerForm').style.display = 'block';
-    });
+    if (!regPassword || regPassword.length < 4) {
+        alert('Пароль должен быть от 4 символов');
+        return;
+    }
     
-    document.getElementById('showLogin').addEventListener('click', function(e) {
-        e.preventDefault();
-        document.getElementById('registerForm').style.display = 'none';
-        document.getElementById('loginForm').style.display = 'block';
-    });
+    if (regPassword !== regPasswordConfirm) {
+        alert('Пароли не совпадают');
+        return;
+    }
     
-    // ===== РЕГИСТРАЦИЯ =====
-    document.getElementById('registerBtn').addEventListener('click', function() {
-        const regUsername = document.getElementById('regUsername').value.trim();
-        const regPassword = document.getElementById('regPassword').value;
-        const regPasswordConfirm = document.getElementById('regPasswordConfirm').value;
+    try {
+        // 1. Проверяем, не занято ли имя в Firestore
+        const usersRef = db.collection('users');
+        const snapshot = await usersRef.where('username', '==', regUsername).limit(1).get();
         
-        // Проверки
-        if (!regUsername || regUsername.length < 3) {
-            alert('Имя должно быть от 3 символов');
-            return;
-        }
-        
-        if (!regPassword || regPassword.length < 4) {
-            alert('Пароль должен быть от 4 символов');
-            return;
-        }
-        
-        if (regPassword !== regPasswordConfirm) {
-            alert('Пароли не совпадают');
-            return;
-        }
-        
-        // Сохраняем в localStorage
-        const users = JSON.parse(localStorage.getItem('chat_users') || '{}');
-        
-        if (users[regUsername]) {
+        if (!snapshot.empty) {
             alert('Это имя уже занято!');
             return;
         }
         
-        users[regUsername] = {
-            password: simpleHash(regPassword),
-            created: new Date().toISOString()
-        };
+        // 2. Хешируем пароль
+        const passwordHash = simpleHash(regPassword);
         
-        localStorage.setItem('chat_users', JSON.stringify(users));
+        // 3. Сохраняем пользователя в Firestore
+        await usersRef.add({
+            username: regUsername,
+            passwordHash: passwordHash,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastLogin: null,
+            totalMessages: 0,
+            isActive: true
+        });
         
         alert('✅ Регистрация успешна! Теперь войдите');
         
@@ -370,58 +422,71 @@ try {
         // Заполняем поля
         document.getElementById('username').value = regUsername;
         document.getElementById('password').value = regPassword;
-    });
+        
+    } catch (error) {
+        console.error("Ошибка регистрации:", error);
+        alert("Ошибка регистрации. Проверьте подключение к интернету.");
+    }
+});
+
+// ===== ВХОД ЧЕРЕЗ FIRESTORE =====
+document.getElementById('loginBtn').addEventListener('click', async function() {
+    const name = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
     
-    // ===== ВХОД ПО ПАРОЛЮ =====
-    document.getElementById('loginBtn').addEventListener('click', async function() {
-        const name = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-        const rememberMe = document.getElementById('rememberMe').checked;
+    if (!name || !password) {
+        alert('Введите имя и пароль');
+        return;
+    }
+    
+    try {
+        // 1. Ищем пользователя в Firestore
+        const usersRef = db.collection('users');
+        const passwordHash = simpleHash(password);
         
-        if (!name || !password) {
-            alert('Введите имя и пароль');
+        const snapshot = await usersRef
+            .where('username', '==', name)
+            .where('passwordHash', '==', passwordHash)
+            .limit(1)
+            .get();
+        
+        if (snapshot.empty) {
+            alert('Неверное имя пользователя или пароль');
             return;
         }
         
-        // Проверяем пользователя
-        const users = JSON.parse(localStorage.getItem('chat_users') || '{}');
-        const user = users[name];
+        // 2. Проверяем, не в чате ли уже пользователь с таким именем
+        const onlineSnapshot = await db.collection('onlineUsers')
+            .where('username', '==', name)
+            .limit(1)
+            .get();
         
-        if (!user) {
-            alert('Пользователь не найден');
+        if (!onlineSnapshot.empty) {
+            alert('Это имя уже используется в чате');
             return;
         }
         
-        if (user.password !== simpleHash(password)) {
-            alert('Неверный пароль');
-            return;
-        }
+        // 3. Обновляем время последнего входа
+        const userDoc = snapshot.docs[0];
+        await userDoc.ref.update({
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        });
         
-        // Проверяем, не в чате ли уже пользователь с таким именем
-        try {
-            const snapshot = await db.collection('onlineUsers')
-                .where('username', '==', name)
-                .limit(1)
-                .get();
-            
-            if (!snapshot.empty) {
-                alert('Это имя уже используется в чате');
-                return;
-            }
-        } catch (error) {
-            console.error("Ошибка проверки:", error);
-        }
-        
-        // Сохраняем если нужно
+        // 4. Сохраняем в localStorage только имя (если нужно)
         if (rememberMe) {
             localStorage.setItem('chat_saved_name', name);
         }
         
-        // Входим в чат
+        // 5. Входим в чат
         username = name;
         await enterChat();
-    });
-    
+        
+    } catch (error) {
+        console.error("Ошибка входа:", error);
+        alert("Ошибка входа. Проверьте подключение к интернету.");
+    }
+});
     // ===== ВХОД В ЧАТ =====
     async function enterChat() {
         console.log("Вхожу как:", username);
@@ -555,5 +620,42 @@ try {
     alert("Ошибка загрузки чата");
 }
     </script>
+    <!-- ТЁМНАЯ ТЕМА -->
+<script>
+// Создаем кнопку переключения темы
+const themeBtn = document.createElement('button');
+themeBtn.id = 'themeBtn';
+themeBtn.innerHTML = '🌙';
+themeBtn.style.position = 'absolute';
+themeBtn.style.right = '20px';
+themeBtn.style.top = '50%';
+themeBtn.style.transform = 'translateY(-50%)';
+themeBtn.style.background = 'rgba(255,255,255,0.2)';
+themeBtn.style.border = 'none';
+themeBtn.style.color = 'white';
+themeBtn.style.width = '40px';
+themeBtn.style.height = '40px';
+themeBtn.style.borderRadius = '50%';
+themeBtn.style.cursor = 'pointer';
+themeBtn.style.fontSize = '20px';
+
+// Добавляем кнопку
+document.querySelector('header').style.position = 'relative';
+document.querySelector('header').appendChild(themeBtn);
+
+// Клик по кнопке
+themeBtn.onclick = function() {
+    document.body.classList.toggle('dark');
+    this.innerHTML = document.body.classList.toggle('dark');
+    this.innerHTML = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+};
+
+// Загружаем сохраненную тему
+if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark');
+    themeBtn.innerHTML = '☀️';
+}
+</script>
 </body>
-    </html>  
+</html>
